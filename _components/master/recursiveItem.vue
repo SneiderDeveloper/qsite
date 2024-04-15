@@ -1,6 +1,6 @@
 <template>
   <div v-show="showMenu">
-    <div id="listMenu">
+    <div class="listMenu">
       <q-no-ssr v-for="(item,key) in menuData" :key="key" :class="`content-item ${inLine ? 'inline-block' : ''}`">
         <!--ToolTip-->
         <q-tooltip v-if="withTooltip" v-bind="tooltipProps || {}">{{
@@ -170,7 +170,7 @@ export default {
 }
 </script>
 <style lang="scss">
-#listMenu {
+.listMenu {
   .q-expansion-item__container {
     .q-expansion-item__content {
       padding: 0 0 0 15px;

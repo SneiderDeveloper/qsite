@@ -1,6 +1,6 @@
 <template>
   <!--cell content-->
-  <div>
+  <div :style="col?.style">
     <!-- custom component -->  
     <component 
       v-if="component"
@@ -8,10 +8,10 @@
       :is="component" 
       :col="col"
       :row="row"
-      :data="tableData"
+      :data="data"
     />
     <!-- default content -->
-    <div v-if="!isComponent" v-show="!isLoading"  class="ellipsis-2-lines" style="max-width: 300px;" v-html="tableData"></div>
+    <div v-if="!isComponent" v-show="!isLoading" class="ellipsis" v-html="deleteHtml(data)" ></div>
     <q-skeleton v-if="isLoading" animated type="text" />
   </div>
 </template>
@@ -26,6 +26,16 @@ export default defineComponent({
   },
   setup(props, {emit}) {
     return controller(props, emit)
+  },
+  computed: {
+    deleteHtml() {
+      return data => {
+        if (!data) return '';
+        return typeof data === 'string' ?
+          data.replace(/<[^>]+>/g, '') :
+          data;
+      };
+    },
   }
 })
 </script>

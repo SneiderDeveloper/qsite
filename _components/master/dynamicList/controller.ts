@@ -53,6 +53,7 @@ export default function controller(props: any, emit: any) {
     title: computed(() => props?.listData?.read.title || false),
     help: computed(() => props?.listData?.read.help || false),
     actions: computed(() => props?.listData?.actions || false),
+    tableProps: computed(() => props?.listData?.read?.tableProps || null),
     tableActions: computed(() => {
       //Default response
       let response = []      

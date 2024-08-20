@@ -5,7 +5,8 @@
       v-model="row[col.name]"
       v-slot="scope"              
       no-caps
-      :cover="false" :offset="[0, 4]"
+      :cover="false"
+      anchor="bottom start"
       transition-show="fade-in" 
       transition-hide="fade-out"
     >

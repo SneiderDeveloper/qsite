@@ -46,6 +46,7 @@
         <slot name="top-table" >
         </slot>
         <dynamicTable
+          :tableProps="tableProps"
           :columns="columns"
           :rows="rows"
           :actions="actions"
@@ -68,7 +69,7 @@ import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
 
 export default defineComponent({
   props: {
-    listData: {
+    listData: {      
       apiRoute: { default: ''},
       title: { default: ''},
       columns: {default: []},

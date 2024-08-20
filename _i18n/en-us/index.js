@@ -723,6 +723,7 @@ export default {
       "usersToNotify": "Users To notify",
       "emailsToNotify": "Emails To Notify",
       "dateCache": "Last update at {date}.",
+      "details": "details",
       "modal": {
         "welcomeMassiveSync": "Welcome to the Functionality of massive import and export!",
         "integrateCloudFramework": "We have integrated a powerful cloud-based tool. This functionality allows you to carry out these tasks easily, without complications, and in a centralized way. Optimize your processes and save time!",

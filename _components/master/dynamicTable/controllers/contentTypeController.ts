@@ -18,7 +18,7 @@ export default function controller(props, emit) {
   const computeds = {
     // key: computed(() => {})
     //data to display
-    tableData: computed(() => props.col?.format ? props.col.format(props.row[props.col.name]) : props.row[props.col.name]),        
+    data: computed(() => props.col?.format ? props.col.format(props.row[props.col.name]) : props.row[props.col.name]),        
     isComponent: computed(() => props.col?.component || false ),
     isLoading: computed(() => props.row?.isLoading || false),
     showOnLoading: computed(() =>  computeds.isLoading.value && props.col.name != 'id')

@@ -1,6 +1,7 @@
 <template>
   <div id="dynamic-table">
     <q-table      
+      v-bind="tableProps"
       :title="title"
       :loading="loading"
       :rows="rows"
@@ -28,6 +29,15 @@
             :props="props"
             :class="`${col?.dynamicField && !props.row?.isLoading ? 'cursor-pointer' : ''}`"
           >
+            <!---quick click edit popup-->
+            <editablePopup 
+              v-if="col.name != 'actions' && props.row[col.name] && col?.dynamicField && !props.row?.isLoading"
+              :row="props.row"
+              :col="col"
+              :beforeUpdate="beforeUpdate"
+              @updateRow="(row) => $emit('updateRow', row)"
+            />
+
             <!--Actions column-->
             <div v-if="col.name == 'actions'">              
               <btn-menu
@@ -43,14 +53,7 @@
               :row="props.row"
             />            
 
-            <!---quick click edit popup-->
-            <editablePopup 
-              v-if="col?.dynamicField && !props.row?.isLoading"              
-              :row="props.row"
-              :col="col"
-              :beforeUpdate="beforeUpdate"
-              @updateRow="(row) => $emit('updateRow', row)"
-            />
+            
           </q-td>
         </q-tr>
       </template>
@@ -136,6 +139,7 @@ import contextMenu from 'modules/qsite/_components/master/dynamicTable/component
 
 export default defineComponent({
   props: {
+    tableProps: { default: null},
     loading: { default: false},
     title: { default: ''},
     columns: {default: []},

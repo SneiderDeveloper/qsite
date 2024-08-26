@@ -27,7 +27,7 @@
             v-for="col in props.cols"
             :key="col.name"
             :props="props"
-            :class="`${col?.dynamicField && !props.row?.isLoading ? 'cursor-pointer' : ''}`"
+            :class="`${(col?.dynamicField || col?.onClick) && !props.row?.isLoading ? 'cursor-pointer' : ''}`"
           >
             <!---quick click edit popup-->
             <editablePopup 
@@ -132,9 +132,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import controller from 'modules/qsite/_components/master/dynamicTable/controller'
-import editablePopup from 'modules/qsite/_components/master/dynamicTable/components/editablePopup.vue'
-import contentType from 'modules/qsite/_components/master/dynamicTable/components/contentType.vue'
-import contextMenu from 'modules/qsite/_components/master/dynamicTable/components/contextMenu.vue'
+import editablePopup from 'modules/qsite/_components/master/dynamicTable/components/editablePopup'
+import contentType from 'modules/qsite/_components/master/dynamicTable/components/contentType'
+import contextMenu from 'modules/qsite/_components/master/dynamicTable/components/contextMenu'
 
 
 export default defineComponent({
@@ -173,6 +173,11 @@ export default defineComponent({
 </script>
 <style lang="scss">
   #dynamic-table {
+
+    .q-table {
+      padding-bottom: 16px;
+    }
+
     .q-table__top, .q-table__middle, .q-table__bottom {
       border-radius: $custom-radius;
       //box-shadow: $custom-box-shadow;
@@ -189,6 +194,7 @@ export default defineComponent({
     td {
       color: #222222;
     }
+    
 
     .q-table__card {
       background-color: transparent !important;

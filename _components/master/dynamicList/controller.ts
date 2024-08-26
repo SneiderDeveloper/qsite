@@ -156,24 +156,34 @@ export default function controller(props: any, emit: any) {
         }
       })
     },
-    updateRow(row){
-      //state.loading = true
+    updateRow(row){      
       const foundIndex = state.rows.findIndex(r => r.id == row.id);
       state.rows[foundIndex]['isLoading'] = true
 
-      services.updateItem(props.listData.apiRoute, row.id, row).then((response) => {
-        
+      services.updateItem(props.listData.apiRoute, row.id, row).then((response) => {        
         if(response?.data){
           const requestParams = props.listData.read?.requestParams ? {...props.listData.read.requestParams} : {}
             
-          services.showItem(props.listData.apiRoute, row.id, {params: requestParams}).then((response) => {            
+          services.showItem(props.listData.apiRoute, row.id, {params: requestParams, refresh: true}).then((response) => {            
             state.rows[foundIndex] = response.data
             state.rows[foundIndex]['isLoading'] = false
-          })
-          //state.loading = false
-          emit('updatedRow', response.data)
+            emit('updatedRow', response.data)
+          })          
         }
       })
+    },
+    async reloadRow(row){
+      const foundIndex = state.rows.findIndex(r => r.id == row.id);
+      state.rows[foundIndex]['isLoading'] = true
+      
+      const requestParams = props.listData.read?.requestParams ? {...props.listData.read.requestParams} : {}
+            
+      await services.showItem(props.listData.apiRoute, row.id, {params: requestParams, refresh: true}).then((response) => {
+        state.rows[foundIndex] = response.data
+        state.rows[foundIndex]['isLoading'] = false
+      })
+      return state.rows[foundIndex]
+      
     },
     toggleDynamicFilterModal() {
       state.showDynamicFilterModal = !state.showDynamicFilterModal;

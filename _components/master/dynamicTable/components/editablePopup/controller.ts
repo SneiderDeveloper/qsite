@@ -17,6 +17,7 @@ export default function controller(props, emit) {
   // Computed
   const computeds = {
     // key: computed(() => {})
+    maxWidth: computed(() => props.col.dynamicField?.maxWidth ? props.col.dynamicField.maxWidth : '300px' ),
     isSelectField: computed(() => props.col.dynamicField.type == 'select'), 
     fieldName: computed(() => props.col.dynamicField?.name ? props.col.dynamicField.name : props.col.name) //field to update
   }
@@ -26,12 +27,13 @@ export default function controller(props, emit) {
     // methodKey: () => {}
     async runBeforeUpdate(scope){      
       let response = true
-      const tempRow = {...props.row}
-      
-      tempRow[computeds.fieldName.value] = computeds.isSelectField.value ? scope.value.id : scope.value
+
+      const val = computeds.isSelectField.value ? scope.value.id : scope.value //if selectField      
+      const tempRow = {...props.row}      
+      tempRow[computeds.fieldName.value] = val
       
       if(props.beforeUpdate){        
-        await props.beforeUpdate(tempRow).then((val) => {
+        await props.beforeUpdate({val, row: tempRow, col: props.col}).then((val) => {
           scope.set()
           emit('updateRow', tempRow)
         }).catch(error => {

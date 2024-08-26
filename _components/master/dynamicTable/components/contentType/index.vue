@@ -8,16 +8,16 @@
       :is="component" 
       :col="col"
       :row="row"
-      :data="data"
+      :val="val"
     />
     <!-- default content -->
-    <div v-if="!isComponent" v-show="!isLoading" class="ellipsis" v-html="deleteHtml(data)" ></div>
+    <div v-if="!isComponent" v-show="!isLoading" class="ellipsis" v-html="val" @click="onClick({val, col, row})"></div>
     <q-skeleton v-if="isLoading" animated type="text" />
   </div>
 </template>
 <script lang="ts">
 import {defineComponent} from 'vue'
-import controller from 'modules/qsite/_components/master/dynamicTable/controllers/contentTypeController'
+import controller from 'modules/qsite/_components/master/dynamicTable/components/contentType/controller'
 
 export default defineComponent({
   props: {
@@ -26,16 +26,6 @@ export default defineComponent({
   },
   setup(props, {emit}) {
     return controller(props, emit)
-  },
-  computed: {
-    deleteHtml() {
-      return data => {
-        if (!data) return '';
-        return typeof data === 'string' ?
-          data.replace(/<[^>]+>/g, '') :
-          data;
-      };
-    },
   }
 })
 </script>

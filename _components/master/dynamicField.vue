@@ -75,12 +75,29 @@
           </template>
         </q-input>
         <!--Date-->
-        <q-input v-if="loadField('date')"
-                 v-model="responseValue"
-                 v-bind="fieldProps.field"
-                 :label="fieldLabel"
-                 :class="`${field.help ? 'date-dynamic-field' : ''}`">
+        <q-input
+          v-if="loadField('date')"
+          v-model="responseValue"
+          v-bind="fieldProps.field"
+          :label="fieldLabel"
+          class="tw-w-full"
+          :class="`${field.help ? 'date-dynamic-field' : ''}`">
           <template v-slot:prepend>
+            <!-- Quick Navigation Button (Previous Day) -->
+            <q-btn
+              v-show="field.quickNavigation"
+              text-color="primary"
+              class="q-mr-sm"
+              size="sm"
+              unelevated
+              round
+              icon="fa-regular fa-chevron-left"
+              @click="updateDate(false)"
+            >
+              <q-tooltip anchor="bottom middle" self="top middle">
+                {{ $tr('isite.cms.label.previous') }}
+              </q-tooltip>
+            </q-btn>
             <!--Float calendar-->
             <q-icon v-if="fieldProps.field.icon"
                     :name="fieldProps.field.icon"
@@ -92,6 +109,23 @@
                         @update:modelValue="() => $refs.qDateProxy.hide()" />
               </q-popup-proxy>
             </q-icon>
+          </template>
+          <template v-slot:append>
+            <!-- Quick Navigation Button (Next Day) -->
+            <q-btn
+              v-show="field.quickNavigation"
+              text-color="primary"
+              class="q-mr-sm"
+              size="sm"
+              unelevated
+              round
+              icon="fa-regular fa-chevron-right"
+              @click="updateDate(true)"
+            >
+              <q-tooltip anchor="bottom middle" self="top middle">
+                {{ $tr('isite.cms.label.next') }}
+              </q-tooltip>
+            </q-btn>
           </template>
         </q-input>
         <!--Hour-->
@@ -138,6 +172,13 @@
             </q-icon>
           </template>
         </q-input>
+        <!--Time spent -->
+         <timeSpent v-if="loadField('timeSpent')"
+                         v-model="responseValue"
+                         :fieldProps="fieldProps"
+                         :label="fieldLabel"
+                         :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
+        />
         <!--Date range -->
         <dateRangePicker v-if="loadField('dateRange')"
                          v-model="responseValue"
@@ -477,6 +518,7 @@ import expressionField from 'modules/qsite/_components/master/expressionField/in
 import localizedPhone from 'modules/qsite/_components/master/localizedPhone/index.vue';
 import multipleDynamicFields from 'modules/qsite/_components/master/multipleDynamicFields/views';
 import dateRangePicker from 'modules/qsite/_components/master/dateRangePicker';
+import timeSpent from 'modules/qsite/_components/master/timeSpent';
 import { eventBus } from 'src/plugins/utils';
 
 export default {
@@ -518,7 +560,8 @@ export default {
     expressionField,
     localizedPhone,
     multipleDynamicFields,
-    dateRangePicker
+    dateRangePicker,
+    timeSpent
   },
   watch: {
     modelValue: {
@@ -759,6 +802,39 @@ export default {
             }
           };
           break;
+        case'timeSpent':
+          //Instance the mask
+          const maskTimeSpent = '2w 4d 6h 45m'
+          const regexTimeSpent = /^(\d+[wdhm]\s*)+\s*$/; //numbers and wdhm
+          props = {
+            field: {
+              unit: props?.unit || 'minutes',
+              bgColor: 'white',
+              clearable: props?.clearable || true,
+              color: 'primary',
+              outlined: true,
+              dense: true,
+              icon: 'fa-light fa-timer',
+              //placeHolder: '2w 4d 6h 45m',
+              regex: regexTimeSpent,
+              hint: `${this.$tr('isite.cms.label.format')}: ${maskTimeSpent}`,
+              ...props,
+              rules: [
+                ...(props.rules || []),
+                val => {
+                  if (!val) return true;
+                  return regexTimeSpent.test(val) || `${this.$tr('isite.cms.message.invalidFormat')} (${maskTimeSpent})`;
+                }
+              ]
+              
+            },
+            slot: {
+              ...props,
+              field: props?.field || null
+            }
+          };
+          break;
+          
         case'hour':
           //Instance the mask
           const maskHour = 'HH:mm';
@@ -1262,6 +1338,11 @@ export default {
           load: true
         },
         fullDate: {
+          class: 'absolute-right',
+          margin: '1em',
+          load: true
+        },
+        timeSpent: {
           class: 'absolute-right',
           margin: '1em',
           load: true
@@ -1781,6 +1862,16 @@ export default {
     configModules(name) {
       if (!name) return;
       return Boolean(config(name));
+    },
+    updateDate(isAdd = false) {
+      const params = {
+        isAdd,
+        format: this.fieldProps.slot.mask,
+        unit: this.fieldProps.field.navigation?.unit || 'day',
+        amount: this.fieldProps.field.navigation?.amount || 1
+      };
+
+      if(this.modelValue) this.$emit('update:modelValue', this.$date.calculateNewDate(this.modelValue, params))
     }
   }
 };

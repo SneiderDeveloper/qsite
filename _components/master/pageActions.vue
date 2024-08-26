@@ -141,7 +141,7 @@ export default {
       }
     },
   },
-  emits: ['search', 'new', 'refresh', 'toggleDynamicFilterModal'],
+  emits: ['search', 'new', 'refresh', 'toggleDynamicFilterModal', 'activateTour'],
   /*
   inject: {
     filterPlugin: {
@@ -181,6 +181,7 @@ export default {
       badgeAppear: false,
       timeOuts: [],
       bulkActionsConfig: false,
+      enableTourAction: false
     };
   },
   watch: {
@@ -253,7 +254,7 @@ export default {
         //Tour
         {
           label: 'Tour',
-          vIf: (this.tourName && !config('app.disableTours') && (this.$store.getters['qsiteApp/getConfigApp']('igamification') != undefined)),
+          vIf: this.enableTourAction,
           props: {
             icon: 'fa-light fa-shoe-prints',
             id: 'actionStartTour'
@@ -412,13 +413,18 @@ export default {
   methods: {
     init() {
       this.showBadgeRefresh(this.expiresIn)
-      //this.handlerEvent();
+      this.validateEnableTour();
     },
-    /*
-    handlerEvent() {
-      eventBus.on('toggleMasterDrawer', () => this.toggleMasterFilter(false));
+    async validateEnableTour() {
+      if(this.tourName && !config('app.disableTours') &&
+        (this.$store.getters['qsiteApp/getConfigApp']('igamification') != undefined)){
+        let tour = await this.$tour.getTourData(this.tourName, true)
+        if(tour) { 
+          this.enableTourAction = true
+          this.$emit('activateTour');
+        }
+      }
     },
-    */
     refreshByTime(time) {
       this.timeRefresh = time;
       this.titleRefresh = time === 0

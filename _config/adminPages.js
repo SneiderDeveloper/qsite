@@ -139,4 +139,19 @@ export default {
       refresh: true,
     },
   },
+  appContexts: {
+    permission: 'isite.app-contexts.manage',
+    activated: true,
+    path: '/site/app-contexts',
+    name: 'appContexts',
+    crud: import('modules/qsite/_crud/appContexts'),
+    page: () => import('modules/qcrud/_pages/admin/crudPage'),
+    layout: () => import('layouts/master.vue'),
+    title: 'App Contexts',
+    icon: 'fal fa-screwdriver-wrench',
+    authenticated: true,
+    subHeader: {
+      refresh: true,
+    },
+  },
 };

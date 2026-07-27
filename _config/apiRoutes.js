@@ -29,4 +29,5 @@ export default {
   files: `${urlBaseMedia}/files`,
   cruds: `${urlBase}/cruds`,
   zone: `${urlBaseMedia}/zones`,
+  appContexts: `${urlBase}/app-contexts`,
 };

@@ -16,4 +16,5 @@ export default [
   pages.qsite.index, //setup
   pages.qsite.auditLog,
   pages.qsite.dynamicCruds,
+  pages.qsite.appContexts,
 ];

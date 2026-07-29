@@ -159,12 +159,7 @@ export default {
 
           permissions: {
             value: {},
-            type: 'json',
-            props: {
-              label: 'Permissions',
-              type: 'textarea',
-              hint: 'JSON Object',
-            },
+            type: 'permissions',
           },
 
           configs: {

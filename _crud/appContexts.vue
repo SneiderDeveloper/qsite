@@ -72,10 +72,12 @@ export default {
           filters: {},
 
           actions: [],
+          requestParams: { include: 'authProviders' },
         },
 
         update: {
           title: 'Update App Context',
+          requestParams: { include: 'authProviders' },
         },
 
         delete: true,
@@ -144,8 +146,24 @@ export default {
               label: 'Apple HTML Callback',
             },
           },
+          authProviders: {
+            value: [],
+            type: 'select',
+            props: {
+              label: 'Auth Providers',
+              multiple: true,
+              useInput: true,
+              useChips: true,
+            },
+            loadOptions: {
+              apiRoute: 'apiRoutes.qsite.authProviders',
+              select: {
+                id: 'id',
+                label: 'name',
+              },
+            },
+          },
         },
-
         formRight: {
           settings: {
             value: [],

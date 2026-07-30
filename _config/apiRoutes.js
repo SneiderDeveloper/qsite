@@ -30,4 +30,5 @@ export default {
   cruds: `${urlBase}/cruds`,
   zone: `${urlBaseMedia}/zones`,
   appContexts: `${urlBase}/app-contexts`,
+  authProviders: `/profile/v1/auth-providers`,
 };

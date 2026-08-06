@@ -146,7 +146,7 @@
       openModal(item = false){
         if(item){
           this.link = item.url ?? false
-          this.content = item.embed ?? false
+          this.content = item?.embed || item?.widgetHtml || false
         }
         this.contentPreview = (!this.link && this.content)
         this.showModal = true

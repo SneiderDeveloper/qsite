@@ -1,0 +1,280 @@
+import {
+  ref,
+  reactive,
+  computed,
+  provide,
+  nextTick,
+  toRefs,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue'
+import moment, { Moment } from 'moment'
+import { eventBus, i18n } from 'src/plugins/utils.ts'
+import service from '../../services'
+import store from '../../store'
+import { ChunkUnit, Context, Gantt, Range, TimelineFeature } from './interface'
+import { ganttModel } from './models'
+import {
+  GANTT_CONTEXT,
+  HEADER_HEIGHT,
+  MAX_PERIODS,
+  PERIOD_FORMAT,
+  RANGES,
+  ROW_HEIGHT,
+  SIDEBAR_WIDTH,
+  ZOOM,
+  getChunkUnit,
+  getChunkWidth,
+  getColumnWidth,
+  getOffset,
+  getTimelineGroups,
+  getTimelineMarkers,
+  getTimelineStart,
+} from './helper'
+
+export default function controller(props: any, emit: any) {
+
+  const { apiRoute, data } = toRefs(props)
+
+  const refs = {
+    isLoading: ref(true),
+    ganttData: ref<Gantt>({ ...ganttModel }),
+    ganttRef: ref<any>(null),
+    localFilters: ref({}),
+  }
+
+  const state = reactive<{ range: Range, zoom: number, periods: string[] }>({
+    range: ganttModel.range,
+    zoom: ganttModel.zoom,
+    periods: [],
+  })
+
+  const computeds = {
+    context: computed<Context>(() => ({
+      range: state.range,
+      zoom: state.zoom,
+      columnWidth: getColumnWidth(state.range),
+      sidebarWidth: computeds.showSidebar.value
+        ? (refs.ganttData.value?.sidebar?.width || SIDEBAR_WIDTH)
+        : 0,
+      headerHeight: HEADER_HEIGHT,
+      rowHeight: ROW_HEIGHT,
+      periods: state.periods,
+    })),
+    groups: computed(() => getTimelineGroups(refs.ganttData.value)),
+    markers: computed(() => getTimelineMarkers(refs.ganttData.value?.markers)),
+    showSidebar: computed(() => refs.ganttData.value?.sidebar?.show !== false),
+    showToday: computed(() => refs.ganttData.value?.today !== false),
+    today: computed(() => moment()),
+    thereAreFeatures: computed(() => (
+      computeds.groups.value.some(group => group.rows.length)
+    )),
+    cssVariables: computed(() => ({
+      '--gantt-zoom': `${computeds.context.value.zoom}`,
+      '--gantt-column-width': `${(computeds.context.value.zoom / 100) * computeds.context.value.columnWidth}px`,
+      '--gantt-header-height': `${HEADER_HEIGHT}px`,
+      '--gantt-row-height': `${ROW_HEIGHT}px`,
+      '--gantt-sidebar-width': `${computeds.context.value.sidebarWidth}px`,
+      gridTemplateColumns: 'var(--gantt-sidebar-width) 1fr',
+    })),
+  }
+
+  const methods = {
+    getData: async (filters: {}, refresh: boolean = false): Promise<Gantt> => {
+      return await service.getQuickCardData(apiRoute.value, filters, refresh)
+    },
+    /* Dates covered by the data, today is included unless the range is hourly */
+    getDataBounds: (): { first: Moment, last: Moment } => {
+      const rows = computeds.groups.value.flatMap(group => group.rows)
+      const today = moment()
+      if (!rows.length) return { first: today, last: today }
+
+      const dates = [
+        ...rows.map(row => row.startAt),
+        ...rows.map(row => row.endAt || row.startAt),
+        ...computeds.markers.value.map(marker => marker.date),
+        ...(state.range === 'hourly' ? [] : [today]),
+      ]
+
+      return { first: moment.min(dates).clone(), last: moment.max(dates).clone() }
+    },
+    /* The timeline always starts one chunk before and ends one chunk after the data */
+    setTimeline: () => {
+      const unit = getChunkUnit(state.range)
+      const { first, last } = methods.getDataBounds()
+      const lastPeriod = last.startOf(unit).add(1, unit)
+      const cursor = first.startOf(unit).subtract(1, unit)
+      const periods: string[] = []
+
+      while (cursor.isSameOrBefore(lastPeriod)) {
+        periods.push(cursor.format(PERIOD_FORMAT))
+        cursor.add(1, unit)
+      }
+
+      state.periods = methods.trimPeriods(periods, unit)
+    },
+    /* Painting every chunk of a wide range would mean thousands of columns */
+    trimPeriods: (periods: string[], unit: ChunkUnit): string[] => {
+      const maxPeriods = MAX_PERIODS[state.range]
+      if (periods.length <= maxPeriods) return periods
+
+      const initialPeriod = methods.getInitialDate().startOf(unit).format(PERIOD_FORMAT)
+      const index = Math.max(periods.indexOf(initialPeriod), 0)
+      const from = Math.min(
+        Math.max(index - Math.floor(maxPeriods / 2), 0),
+        periods.length - maxPeriods
+      )
+
+      return periods.slice(from, from + maxPeriods)
+    },
+    fetchGanttData: async (refresh: boolean = false) => {
+      refs.isLoading.value = true
+      if (apiRoute.value) {
+        const mergingFilter = {
+          ...store.globalFilters || {},
+          ...refs.localFilters.value || {}
+        }
+        refs.ganttData.value = await methods.getData(mergingFilter, refresh)
+      } else refs.ganttData.value = data.value
+
+      state.range = refs.ganttData.value?.range || ganttModel.range
+      state.zoom = refs.ganttData.value?.zoom || ganttModel.zoom
+      methods.setTimeline()
+      refs.isLoading.value = false
+
+      await nextTick()
+      methods.scrollToDate(methods.getInitialDate(), false)
+    },
+    /* The timeline opens over today, or over the first feature when today is out of range */
+    getInitialDate: (): Moment => {
+      const rows = computeds.groups.value.flatMap(group => group.rows)
+      if (!rows.length) return moment()
+
+      const today = moment()
+      const firstDate = moment.min(rows.map(row => row.startAt))
+      const lastDate = moment.max(rows.map(row => row.endAt || row.startAt))
+
+      return today.isBetween(firstDate, lastDate) ? today : firstDate.clone()
+    },
+    updateFilters: async (filters) => {
+      refs.localFilters.value = filters
+      await methods.fetchGanttData()
+    },
+    scrollToDate: (date: Moment, smooth: boolean = true) => {
+      const element = refs.ganttRef.value
+      if (!element) return
+
+      const { sidebarWidth } = computeds.context.value
+      const offset = getOffset(date, computeds.context.value)
+      const left = offset - ((element.clientWidth - sidebarWidth) / 2)
+
+      element.scrollTo({
+        left: Math.max(left, 0),
+        behavior: smooth ? 'smooth' : 'auto',
+      })
+    },
+    scrollToToday: () => methods.scrollToDate(moment()),
+    selectFeature: (feature: TimelineFeature) => emit('selectFeature', feature),
+    /* The timeline grows to the past or to the future when its edges are reached */
+    handleScroll: () => {
+      const element = refs.ganttRef.value
+      if (!element || refs.isLoading.value) return
+
+      const { scrollLeft, scrollWidth, clientWidth } = element
+      const unit = getChunkUnit(state.range)
+
+      if (scrollLeft <= 0) {
+        const period = moment(state.periods[0]).subtract(1, unit).format(PERIOD_FORMAT)
+        state.periods = [period, ...state.periods]
+        return nextTick(() => {
+          element.scrollLeft = getChunkWidth(period, computeds.context.value)
+        })
+      }
+
+      if ((scrollLeft + clientWidth) >= scrollWidth) {
+        const lastPeriod = state.periods[state.periods.length - 1]
+        state.periods = [
+          ...state.periods,
+          moment(lastPeriod).add(1, unit).format(PERIOD_FORMAT),
+        ]
+      }
+    },
+    /* The chunks are rebuilt because the hourly range splits the timeline in days */
+    toggleRange: () => {
+      const nextRange = (RANGES.indexOf(state.range) + 1) % RANGES.length
+      const centeredDate = methods.getCenteredDate()
+      state.range = RANGES[nextRange]
+      methods.setTimeline()
+      nextTick(() => methods.scrollToDate(centeredDate, false))
+    },
+    updateZoom: (step: number) => {
+      const zoom = Math.min(Math.max(state.zoom + step, ZOOM.min), ZOOM.max)
+      if (zoom === state.zoom) return
+
+      const centeredDate = methods.getCenteredDate()
+      state.zoom = zoom
+      nextTick(() => methods.scrollToDate(centeredDate, false))
+    },
+    zoomIn: () => methods.updateZoom(ZOOM.step),
+    zoomOut: () => methods.updateZoom(-ZOOM.step),
+    /* Date painted in the middle of the timeline, used to keep it after a zoom or range change */
+    getCenteredDate: (): Moment => {
+      const element = refs.ganttRef.value
+      const context = computeds.context.value
+      if (!element) return moment()
+
+      const center = element.scrollLeft + ((element.clientWidth - context.sidebarWidth) / 2)
+      const columnWidth = (context.columnWidth * context.zoom) / 100
+      const columns = center / columnWidth
+      const units = { hourly: 'hours', daily: 'days', monthly: 'months', quarterly: 'months' }
+
+      return getTimelineStart(context).add(Math.round(columns), units[context.range])
+    },
+  }
+
+  const tools = [
+    {
+      name: 'range',
+      icon: 'fa-regular fa-calendar-range',
+      action: methods.toggleRange,
+    },
+    {
+      name: 'today',
+      icon: 'fa-regular fa-location-crosshairs',
+      action: methods.scrollToToday,
+    },
+    {
+      name: 'zoomOut',
+      icon: 'fa-regular fa-magnifying-glass-minus',
+      action: methods.zoomOut,
+    },
+    {
+      name: 'zoomIn',
+      icon: 'fa-regular fa-magnifying-glass-plus',
+      action: methods.zoomIn,
+    },
+  ]
+
+  const todayLabel = i18n.tr('isite.cms.label.today')
+
+  provide(GANTT_CONTEXT, computeds.context)
+
+  onMounted(async () => {
+    await methods.fetchGanttData()
+
+    eventBus.on('crud.data.refresh', async () => {
+      await methods.fetchGanttData(true)
+    })
+  })
+
+  onBeforeUnmount(() => {
+    eventBus.off('crud.data.refresh')
+  })
+
+  watch(() => store.globalFilters, async (): Promise<void> => {
+    await methods.fetchGanttData()
+  }, { deep: true })
+
+  return { ...refs, ...toRefs(state), ...computeds, ...methods, tools, todayLabel }
+}

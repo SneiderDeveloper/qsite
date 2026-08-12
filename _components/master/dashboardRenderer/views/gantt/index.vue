@@ -55,7 +55,7 @@ export default defineComponent({
     :toolbox="{
       tools,
       features: {
-        range: true,
+        // range: true,
         today: true,
         zoomOut: true,
         zoomIn: true,

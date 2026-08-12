@@ -5,6 +5,10 @@ export type Range = 'hourly' | 'daily' | 'monthly' | 'quarterly'
 
 export type ChunkUnit = 'day' | 'month' | 'year'
 
+export interface Filters {
+  [key: string]: unknown,
+}
+
 export interface Status {
   id?: string | number,
   name?: string,
@@ -46,8 +50,8 @@ export interface Sidebar {
 
 export interface Gantt {
   header?: Header,
-  range?: Range,
-  zoom?: number,
+  range: Range,
+  zoom: number,
   today?: boolean,
   sidebar?: Sidebar,
   markers?: Marker[],

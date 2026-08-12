@@ -8,7 +8,7 @@ export interface Toolbox {
   tools?: {
     name: string,
     icon: string,
-    action: function,
+    action: Function,
   },
   features: {
     [key: string]: boolean | object,

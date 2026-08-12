@@ -250,6 +250,7 @@ export default {
         "pagination": "Pagination",
         "page": "Page | Pages",
         "today": "Today",
+        "duration": "Duration",
         "yesterday": "Yesterday",
         "tomorrow": "Tomorrow",
         "LastNumDays": "Last {numDays} days",

@@ -248,6 +248,7 @@ export default {
         'pagination': 'Paginación',
         'page': 'Pagína | Paginas',
         'today': 'Hoy',
+        'duration': 'Duración',
         'yesterday': 'Ayer',
         'tomorrow': 'Mañana',
         'LastNumDays': 'Ultimos {numDays} dias',

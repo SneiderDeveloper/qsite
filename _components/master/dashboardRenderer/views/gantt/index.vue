@@ -48,7 +48,7 @@ export default defineComponent({
   <card-container
     :className="className"
     :isLoading="isLoading"
-    :isEmpty="!thereAreFeatures"
+    :isEmpty="!thereAreGroups"
     :header="ganttData?.header || header"
     @reloadData="fetchGanttData"
     @updateFilters="filters => updateFilters(filters)"
@@ -74,10 +74,10 @@ export default defineComponent({
         />
       </section>
     </div>
-    <no-data v-if="!thereAreFeatures && !isLoading" class="tw-h-[337px]" />
+    <no-data v-if="!thereAreGroups && !isLoading" class="tw-h-[337px]" />
     <!-- Gantt -->
     <div
-      v-if="thereAreFeatures && !isLoading"
+      v-if="thereAreGroups && !isLoading"
       ref="ganttRef"
       class="
         gantt
@@ -109,6 +109,10 @@ export default defineComponent({
         >
           <div v-for="group in groups" :key="group.id">
             <div v-if="group?.name" :style="{ height: 'var(--gantt-row-height)' }" />
+            <div
+              v-if="!group.rows.length"
+              :style="{ height: 'var(--gantt-row-height)' }"
+            />
             <div
               v-for="row in group.rows"
               :key="row.id"

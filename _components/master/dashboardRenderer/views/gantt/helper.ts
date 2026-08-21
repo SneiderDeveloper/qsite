@@ -267,7 +267,7 @@ export const getTimelineGroups = (data: Gantt): TimelineGroup[] => {
 
   return groups.flatMap((group, index) => {
     const rows = getTimelineRows(group?.features || [])
-    if (!rows.length) return []
+    if (!rows.length && !group?.name) return []
 
     return {
       id: group?.id || `group-${index}`,

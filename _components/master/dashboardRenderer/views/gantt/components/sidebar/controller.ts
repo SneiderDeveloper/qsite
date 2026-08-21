@@ -12,6 +12,7 @@ export default function controller(props: any, emit: any) {
     durationLabel: computed(() => (
       labels.value?.duration || i18n.tr('isite.cms.label.duration')
     )),
+    emptyLabel: computed(() => labels.value?.empty || i18n.tr('isite.cms.label.empty')),
   }
 
   const methods = {

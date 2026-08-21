@@ -45,6 +45,7 @@ export interface Sidebar {
   labels?: {
     name?: string,
     duration?: string,
+    empty?: string,
   },
 }
 

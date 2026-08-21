@@ -77,6 +77,22 @@ export default defineComponent({
         >
           {{ group.name }}
         </p>
+        <div
+          v-if="!group.rows.length"
+          class="
+            tw-flex
+            tw-items-center
+            tw-gap-2
+            tw-p-2.5
+            tw-text-xs
+            tw-italic
+            tw-text-gray-400
+          "
+          :style="{ height: 'var(--gantt-row-height)' }"
+        >
+          <i class="fa-regular fa-circle-minus tw-shrink-0" />
+          <span class="tw-truncate">{{ emptyLabel }}</span>
+        </div>
         <div class="tw-divide-y tw-divide-gray-100">
           <div
             v-for="row in group.rows"

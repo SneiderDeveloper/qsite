@@ -80,9 +80,7 @@ export default function controller(props: any, emit: any) {
     showSidebar,
     showToday: computed(() => refs.ganttData.value?.today !== false),
     today: computed(() => moment()),
-    thereAreFeatures: computed(() => (
-      groups.value.some(group => group.rows.length)
-    )),
+    thereAreGroups: computed(() => groups.value.length > 0),
     cssVariables: computed(() => ({
       '--gantt-zoom': `${context.value.zoom}`,
       '--gantt-column-width': `${(context.value.zoom / 100) * context.value.columnWidth}px`,

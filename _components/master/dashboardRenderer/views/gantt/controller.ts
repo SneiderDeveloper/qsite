@@ -110,34 +110,39 @@ export default function controller(props: any, emit: any) {
 
       return { first: moment.min(dates).clone(), last: moment.max(dates).clone() }
     },
-    // The timeline always starts one chunk before and ends one chunk after the data
+    // The timeline starts one chunk before the data and ends one chunk after it.
+    // The amount of chunks is capped BEFORE building them: a single far away
+    // date, a 9999 sentinel for instance, would otherwise generate millions
     setTimeline: () => {
       const unit = getChunkUnit(state.range)
-      const { first, last } = methods.getDataBounds()
-      const lastPeriod = last.startOf(unit).add(1, unit)
-      const cursor = first.startOf(unit).subtract(1, unit)
-      const periods: string[] = []
-
-      while (cursor.isSameOrBefore(lastPeriod)) {
-        periods.push(cursor.format(PERIOD_FORMAT))
-        cursor.add(1, unit)
-      }
-
-      state.periods = methods.trimPeriods(periods, unit)
-    },
-    // Painting every chunk of a wide range would mean thousands of columns
-    trimPeriods: (periods: string[], unit: ChunkUnit): string[] => {
       const maxPeriods = MAX_PERIODS[state.range]
-      if (periods.length <= maxPeriods) return periods
+      const { first, last } = methods.getDataBounds()
 
-      const initialPeriod = methods.getInitialDate().startOf(unit).format(PERIOD_FORMAT)
-      const index = Math.max(periods.indexOf(initialPeriod), 0)
-      const from = Math.min(
-        Math.max(index - Math.floor(maxPeriods / 2), 0),
-        periods.length - maxPeriods
+      const from = first.startOf(unit).subtract(1, unit)
+      const to = last.startOf(unit).add(1, unit)
+      const total = Math.max(to.diff(from, unit) + 1, 1)
+      const start = total <= maxPeriods
+        ? from
+        : methods.getCappedStart(from, to, unit, maxPeriods)
+
+      state.periods = Array.from(
+        { length: Math.min(total, maxPeriods) },
+        (item, index) => start.clone().add(index, unit).format(PERIOD_FORMAT)
       )
+    },
+    // Data too wide to be painted at once is windowed around the initial date
+    getCappedStart: (
+      from: Moment,
+      to: Moment,
+      unit: ChunkUnit,
+      maxPeriods: number
+    ): Moment => {
+      const centered = methods.getInitialDate()
+        .startOf(unit)
+        .subtract(Math.floor(maxPeriods / 2), unit)
+      const latest = to.clone().subtract(maxPeriods - 1, unit)
 
-      return periods.slice(from, from + maxPeriods)
+      return moment.max(from, moment.min(centered, latest))
     },
     fetchGanttData: async (refresh: boolean = false) => {
       refs.isLoading.value = true
@@ -162,9 +167,11 @@ export default function controller(props: any, emit: any) {
       const rows = groups.value.flatMap(group => group.rows)
       if (!rows.length) return moment()
 
+      // Compared against the starts, so a runaway end date does not drag the focus
       const today = moment()
-      const firstDate = moment.min(rows.map(row => row.startAt))
-      const lastDate = moment.max(rows.map(row => row.endAt || row.startAt))
+      const starts = rows.map(row => row.startAt)
+      const firstDate = moment.min(starts)
+      const lastDate = moment.max(starts)
 
       return today.isBetween(firstDate, lastDate) ? today : firstDate.clone()
     },

@@ -189,8 +189,13 @@ export default defineComponent({
   }
 
   .q-table__top {
-    margin-bottom: 16px !important;
-    padding: 12px 16px !important;
+    margin-bottom: 4px !important;
+    padding: 0 0 8px !important;
+  }
+
+  .q-table__title {
+    font-size: 16px;
+    font-weight: 600;
   }
 
   .q-table__middle {

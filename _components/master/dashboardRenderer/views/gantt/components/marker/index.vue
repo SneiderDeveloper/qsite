@@ -28,24 +28,26 @@ export default defineComponent({
       tw-pointer-events-none
       tw-absolute
       tw-left-0
-      tw-top-0
       tw-z-20
       tw-flex
-      tw-h-full
       tw-select-none
       tw-flex-col
       tw-items-center
       tw-justify-center
       tw-overflow-visible
     "
-    :style="{ width: 0, transform: `translateX(${offset}px)` }"
+    :style="{
+      width: 0,
+      top: 'var(--gantt-header-height)',
+      height: 'calc(100% - var(--gantt-header-height))',
+      transform: `translateX(${offset}px)`,
+    }"
   >
     <div
       class="
         tw-group
         tw-pointer-events-auto
         tw-sticky
-        tw-top-0
         tw-flex
         tw-select-auto
         tw-flex-col
@@ -60,6 +62,7 @@ export default defineComponent({
         tw-font-semibold
       "
       :class="className"
+      :style="{ top: 'var(--gantt-header-height)' }"
     >
       {{ label }}
       <span

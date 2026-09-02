@@ -90,6 +90,11 @@
           :isFirstPage="props.isFirstPage"
           :isLastPage="props.isLastPage"
           @update:modelValue="(val) => $emit('onPagination', val)"
+          class="
+            tw-mt-[16px]
+            tw-px-[12px]
+            tw-px-[15px]
+          "
         />
       </template>
 
@@ -184,8 +189,13 @@ export default defineComponent({
   }
 
   .q-table__top {
-    margin-bottom: 16px !important;
-    padding: 12px 16px !important;
+    margin-bottom: 4px !important;
+    padding: 0 0 8px !important;
+  }
+
+  .q-table__title {
+    font-size: 16px;
+    font-weight: 600;
   }
 
   .q-table__middle {
@@ -195,8 +205,10 @@ export default defineComponent({
 
   .q-table__bottom {
     border-top: 1px solid transparent !important;
-    margin-top: 16px !important;
-    padding: 12px 16px !important;
+    margin-top: 0px !important;
+    padding: 0px !important;
+    min-height: 0px !important;
+    
   }
 
   .sticky-actions {

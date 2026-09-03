@@ -16,6 +16,9 @@ export const GANTT_CONTEXT = Symbol('ganttContext')
 
 export const HEADER_HEIGHT = 60
 export const ROW_HEIGHT = 36
+// Lane kept under the header so a marker label never lands over the first row
+export const MARKER_HEIGHT = 26
+export const GANTT_HEIGHT = 337
 export const SIDEBAR_WIDTH = 300
 export const RANGES: Range[] = ['hourly', 'daily', 'monthly', 'quarterly']
 export const ZOOM = { min: 50, max: 200, step: 25, default: 100 }

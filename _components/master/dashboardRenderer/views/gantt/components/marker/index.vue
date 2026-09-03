@@ -33,7 +33,7 @@ export default defineComponent({
       tw-select-none
       tw-flex-col
       tw-items-center
-      tw-justify-center
+      tw-justify-start
       tw-overflow-visible
     "
     :style="{
@@ -62,7 +62,10 @@ export default defineComponent({
         tw-font-semibold
       "
       :class="className"
-      :style="{ top: 'var(--gantt-header-height)' }"
+      :style="{
+        top: 'var(--gantt-header-height)',
+        minHeight: 'var(--gantt-marker-height)',
+      }"
     >
       {{ label }}
       <span
@@ -78,7 +81,14 @@ export default defineComponent({
         {{ formattedDate }}
       </span>
     </div>
-    <div class="tw-h-full tw-w-px" :class="className" />
+    <div
+      class="tw-sticky tw-w-px"
+      :class="className"
+      :style="{
+        top: 'calc(var(--gantt-header-height) + var(--gantt-marker-height))',
+        height: 'calc(var(--gantt-height) - var(--gantt-header-height) - var(--gantt-marker-height))',
+      }"
+    />
   </div>
 </template>
 <style scoped>

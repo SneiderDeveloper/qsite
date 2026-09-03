@@ -30,7 +30,7 @@ export default defineComponent({
       tw-overflow-clip
       tw-border-r
       tw-border-gray-100
-      tw-bg-white/90
+      tw-bg-white
       tw-backdrop-blur-md
     "
   >
@@ -47,7 +47,7 @@ export default defineComponent({
         tw-gap-2.5
         tw-border-b
         tw-border-gray-100
-        tw-bg-white/90
+        tw-bg-white
         tw-p-2.5
         tw-text-xs
         tw-font-semibold
@@ -59,6 +59,14 @@ export default defineComponent({
       <p class="tw-flex-1 tw-truncate tw-text-left">{{ nameLabel }}</p>
       <p class="tw-shrink-0">{{ durationLabel }}</p>
     </div>
+    <!-- Lane matching the one the markers use in the timeline -->
+    <div
+      class="tw-sticky tw-z-10 tw-bg-white"
+      :style="{
+        top: 'var(--gantt-header-height)',
+        height: 'var(--gantt-marker-height)',
+      }"
+    />
     <!-- Groups -->
     <div class="tw-space-y-4">
       <div v-for="group in groups" :key="group.id">

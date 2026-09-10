@@ -154,4 +154,19 @@ export default {
       refresh: true,
     },
   },
+  authProviders: {
+    // permission: 'isite.app-contexts.manage',
+    activated: true,
+    path: '/site/auth-providers',
+    name: 'authProviders',
+    crud: import('modules/qsite/_crud/authProviders'),
+    page: () => import('modules/qcrud/_pages/admin/crudPage'),
+    layout: () => import('layouts/master.vue'),
+    title: 'Auth Providers',
+    icon: 'fa-regular fa-lock',
+    authenticated: true,
+    subHeader: {
+      refresh: true,
+    },
+  },
 };

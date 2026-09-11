@@ -17,4 +17,5 @@ export default [
   pages.qsite.auditLog,
   pages.qsite.dynamicCruds,
   pages.qsite.appContexts,
+  pages.qsite.authProviders,
 ];

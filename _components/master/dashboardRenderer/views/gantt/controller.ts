@@ -24,7 +24,9 @@ import {
 import { ganttModel } from './models'
 import {
   GANTT_CONTEXT,
+  GANTT_HEIGHT,
   HEADER_HEIGHT,
+  MARKER_HEIGHT,
   MAX_PERIODS,
   PERIOD_FORMAT,
   RANGES,
@@ -61,6 +63,11 @@ export default function controller(props: any, emit: any) {
   const showSidebar = computed(() => refs.ganttData.value?.sidebar?.show !== false)
   const groups = computed(() => getTimelineGroups(refs.ganttData.value))
   const markers = computed(() => getTimelineMarkers(refs.ganttData.value?.markers))
+  const showToday = computed(() => refs.ganttData.value?.today !== false)
+  // The lane only takes room when there is something to paint in it
+  const markerHeight = computed(() => (
+    markers.value.length || showToday.value ? MARKER_HEIGHT : 0
+  ))
   const context = computed<Context>(() => ({
     range: state.range,
     zoom: state.zoom,
@@ -78,11 +85,15 @@ export default function controller(props: any, emit: any) {
     groups,
     markers,
     showSidebar,
-    showToday: computed(() => refs.ganttData.value?.today !== false),
+    showToday,
+    markerHeight,
     today: computed(() => moment()),
     thereAreGroups: computed(() => groups.value.length > 0),
     cssVariables: computed(() => ({
       '--gantt-zoom': `${context.value.zoom}`,
+      '--gantt-height': `${GANTT_HEIGHT}px`,
+      '--gantt-marker-height': `${markerHeight.value}px`,
+      height: 'var(--gantt-height)',
       '--gantt-column-width': `${(context.value.zoom / 100) * context.value.columnWidth}px`,
       '--gantt-header-height': `${HEADER_HEIGHT}px`,
       '--gantt-row-height': `${ROW_HEIGHT}px`,
@@ -167,7 +178,6 @@ export default function controller(props: any, emit: any) {
       const rows = groups.value.flatMap(group => group.rows)
       if (!rows.length) return moment()
 
-      // Compared against the starts, so a runaway end date does not drag the focus
       const today = moment()
       const starts = rows.map(row => row.startAt)
       const firstDate = moment.min(starts)

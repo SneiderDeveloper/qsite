@@ -25,7 +25,7 @@ export default defineComponent({
           tw-grid
           tw-w-full
           tw-shrink-0
-          tw-bg-white/90
+          tw-bg-white
           tw-backdrop-blur-sm
         "
         :style="{ height: 'var(--gantt-header-height)' }"
@@ -70,6 +70,22 @@ export default defineComponent({
           </div>
         </div>
       </div>
+      <!-- Lane the markers live in, opaque so the rows scroll under it -->
+      <div
+        class="
+          tw-sticky 
+          tw-z-20 
+          tw-w-full 
+          tw-shrink-0 
+          tw-bg-gradient-to-b 
+          tw-from-neutral-50
+          tw-to-transparent
+        "
+        :style="{
+          top: 'var(--gantt-header-height)',
+          height: 'var(--gantt-marker-height)',
+        }"
+      />
       <!-- Columns -->
       <div
         class="tw-grid tw-h-full tw-w-full tw-divide-x tw-divide-gray-100"

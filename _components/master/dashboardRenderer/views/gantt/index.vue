@@ -84,7 +84,6 @@ export default defineComponent({
         tw-relative
         tw-isolate
         tw-grid
-        tw-h-[337px]
         tw-w-full
         tw-flex-none
         tw-select-none
@@ -105,7 +104,9 @@ export default defineComponent({
         <!-- Features -->
         <div
           class="tw-absolute tw-left-0 tw-top-0 tw-h-full tw-w-max tw-space-y-4"
-          :style="{ marginTop: 'var(--gantt-header-height)' }"
+          :style="{
+            marginTop: 'calc(var(--gantt-header-height) + var(--gantt-marker-height))',
+          }"
         >
           <div v-for="group in groups" :key="group.id">
             <div v-if="group?.name" :style="{ height: 'var(--gantt-row-height)' }" />

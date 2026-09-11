@@ -28,7 +28,6 @@ export default defineComponent({
       tw-pointer-events-none
       tw-absolute
       tw-left-0
-      tw-z-20
       tw-flex
       tw-select-none
       tw-flex-col
@@ -36,6 +35,7 @@ export default defineComponent({
       tw-justify-start
       tw-overflow-visible
     "
+    :class="zIndexClass"
     :style="{
       width: 0,
       top: 'var(--gantt-header-height)',
@@ -66,6 +66,8 @@ export default defineComponent({
         top: 'var(--gantt-header-height)',
         minHeight: 'var(--gantt-marker-height)',
       }"
+      @mouseenter="hoverMarker(true)"
+      @mouseleave="hoverMarker(false)"
     >
       {{ label }}
       <span

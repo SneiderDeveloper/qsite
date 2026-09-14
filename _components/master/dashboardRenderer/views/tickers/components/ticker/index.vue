@@ -60,7 +60,7 @@ export default defineComponent({
             v-html="ticker.title"
           />
           <q-btn
-            v-if="(valueHidden || ticker?.valueHidden) && !isLoading"
+            v-if="(valueHidden || ticker?.valueHidden) && !isLoading && (ticker.body.length === 1)"
             unelevated 
             size="xs" 
             class="tw-p-0 tw-ml-2"
@@ -139,14 +139,32 @@ export default defineComponent({
         />
       </div>
     </section>
-    <section
-      v-if="ticker?.icon"
-      class="tw-flex tw-items-center tw-text-2xl"
-      :class="ticker.icon?.className"
-    >
-      <q-skeleton v-show="isLoading" class="tw-w-6 tw-h-6" type="circle"/>
-      <i v-show="!isLoading" :class="ticker.icon?.name"></i>
-    </section>
+    <div class="tw-grid tw-items-center tw-text-gray-400">
+      <q-btn
+        v-if="(valueHidden || ticker?.valueHidden) && !isLoading && (ticker.body.length > 1)"
+        unelevated 
+        size="xs" 
+        class="tw-p-0 tw-mb-1"
+        @click="hideValue"
+        flat
+      >
+        <i 
+          class="fa-regular tw-text-xs" 
+          :class="{
+            'fa-eye': isValueHidden,
+            'fa-eye-slash': !isValueHidden
+          }" 
+        />
+      </q-btn>
+      <section
+        v-if="ticker?.icon"
+        class="tw-flex tw-items-center tw-text-2xl"
+        :class="ticker.icon?.className"
+      >
+        <q-skeleton v-show="isLoading" class="tw-w-6 tw-h-6" type="circle"/>
+        <i v-show="!isLoading" :class="ticker.icon?.name"></i>
+      </section>
+    </div>
   </div>
 </template>
 <style scoped>

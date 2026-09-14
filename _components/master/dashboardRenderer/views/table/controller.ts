@@ -86,7 +86,7 @@ export default function controller(props: any, emit: any) {
     },
     sortAndColor: () => {
       refs.maxNumberPerColor = methods.getMaxNumberPerColor(refs.tableData.value?.colorAssignment)
-      refs.tableData.value?.columns.forEach(col => methods.sort(col))
+      refs.tableData.value?.columns?.forEach(col => methods.sort(col))
     },
     fetchTableData: async (refresh: boolean=false) => {
       refs.isLoading.value = true

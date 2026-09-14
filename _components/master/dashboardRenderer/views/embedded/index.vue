@@ -57,15 +57,15 @@ export default defineComponent({
       v-show="isLoading"
       type="rect"
       class="tw-w-full tw-rounded-2xl"
-      :style="{ height }"
+      :style="cssStyle"
     />
     <no-data v-if="!thereAreData && !isLoading" class="tw-h-[337px]" />
     <!-- Embedded -->
     <iframe
       v-if="thereAreData && !isLoading"
       v-bind="attributes"
-      class="tw-w-full tw-rounded-2xl tw-border-0"
-      :style="{ height }"
+      class="tw-block tw-w-full tw-rounded-2xl tw-border-0"
+      :style="cssStyle"
     />
   </card-container>
 </template>

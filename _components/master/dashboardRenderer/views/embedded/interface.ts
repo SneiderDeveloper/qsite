@@ -5,6 +5,7 @@ export interface Embedded {
   iframe?: string,
   url?: string,
   height?: string | number,
+  aspectRatio?: string | number,
   title?: string,
   allow?: string,
   sandbox?: string,

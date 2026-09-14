@@ -16,7 +16,7 @@ export default function controller(props: any, emit: any) {
 
   const { apiRoute, data } = toRefs(props)
 
-  const DEFAULT_HEIGHT = '337px'
+  const DEFAULT_ASPECT_RATIO = '16 / 9'
   const OMITTED_ATTRIBUTES = ['width', 'height', 'style', 'class']
   const ALLOWED_ATTRIBUTES = [
     'title',
@@ -34,19 +34,22 @@ export default function controller(props: any, emit: any) {
   }
 
   const methods = {
-    getAttributesFromIframe: (iframe?: string): Attributes => {
-      if (!iframe) return {}
-
-      const element = new DOMParser()
-        .parseFromString(iframe, 'text/html')
-        .querySelector('iframe')
-
+    getAttributesFromIframe: (element: HTMLIFrameElement | null): Attributes => {
       if (!element) return {}
 
       return Array.from(element.attributes).reduce((attributes, { name, value }) => {
         if (OMITTED_ATTRIBUTES.includes(name)) return attributes
         return { ...attributes, [name]: value }
       }, {})
+    },
+    getAspectRatioFromIframe: (element: HTMLIFrameElement | null): string | null => {
+      if (!element) return null
+
+      const width = Number(element.getAttribute('width'))
+      const height = Number(element.getAttribute('height'))
+
+      if (!width || !height) return null
+      return `${width} / ${height}`
     },
     getData: async (filters, refresh: boolean = false): Promise<Embedded> => {
       return await service.getQuickCardData(apiRoute.value, filters, refresh)
@@ -72,9 +75,17 @@ export default function controller(props: any, emit: any) {
   }
 
   const computeds = {
+    iframeElement: computed((): HTMLIFrameElement | null => {
+      const iframe = refs.embeddedData.value?.iframe
+      if (!iframe) return null
+
+      return new DOMParser()
+        .parseFromString(iframe, 'text/html')
+        .querySelector('iframe')
+    }),
     attributes: computed((): Attributes => {
       const embedded: any = refs.embeddedData.value || {}
-      const attributes = methods.getAttributesFromIframe(embedded?.iframe)
+      const attributes = methods.getAttributesFromIframe(computeds.iframeElement.value)
 
       return ALLOWED_ATTRIBUTES.reduce((allAttributes, attribute) => {
         if (embedded[attribute] === undefined) return allAttributes
@@ -82,10 +93,16 @@ export default function controller(props: any, emit: any) {
       }, { ...attributes, ...(embedded?.url ? { src: embedded.url } : {}) })
     }),
     src: computed(() => computeds.attributes.value?.src),
-    height: computed(() => {
-      const height = refs.embeddedData.value?.height
-      if (!height) return DEFAULT_HEIGHT
-      return typeof height === 'number' ? `${height}px` : height
+    cssStyle: computed(() => {
+      const { height, aspectRatio } = refs.embeddedData.value || {}
+
+      if (height) return { height: typeof height === 'number' ? `${height}px` : height }
+
+      return {
+        aspectRatio: aspectRatio
+        || methods.getAspectRatioFromIframe(computeds.iframeElement.value)
+        || DEFAULT_ASPECT_RATIO
+      }
     }),
     thereAreData: computed(() => !!computeds.src.value),
   }

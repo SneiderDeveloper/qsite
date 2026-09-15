@@ -12,6 +12,8 @@ import { Table, Column, Row, ColorAssignment, Format } from './interface'
 import { tableModel } from './models'
 import store from '../../store'
 
+const DEFAULT_CHIP_CLASS = 'tw-bg-neutral-200 tw-text-neutral-700'
+
 export default function controller(props: any, emit: any) {
 
   const { apiRoute, data } = toRefs(props)
@@ -73,8 +75,27 @@ export default function controller(props: any, emit: any) {
       methods.sort(column)
     },
     formatted: (value: string | number, format?: Format) => {
+      if (value === null || value === undefined) return value
       if (format) return value.toLocaleString(format.locales, format.options)
       return value
+    },
+    chipStyle: (column: Column, row: Row) => {
+      const chip = column?.chip || {}
+      const value = row[column.name]
+      const matched = chip.values?.[String(value)] || {}
+      //  CSS colors (#hex, rgb(), var()) are used inline; Tailwind classes are used via the `class` attribute
+      const bgColor = matched.bgColor || chip.bgColor
+      const textColor = matched.textColor || chip.textColor
+
+      return {
+        label: String(matched.label ?? methods.formatted(value, column?.format) ?? ''),
+        chipClass: matched.chipClass || chip.chipClass || DEFAULT_CHIP_CLASS,
+        icon: matched.icon || chip.icon,
+        style: {
+          ...(bgColor ? { backgroundColor: bgColor } : {}),
+          ...(textColor ? { color: textColor } : {}),
+        },
+      }
     },
     formatPercentage: (value: number | string) => {
       const percentage = Number(value) * 100

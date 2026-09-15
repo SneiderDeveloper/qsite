@@ -4,12 +4,25 @@ export interface Format {
   locales: string, 
   options: any 
 }
+export interface ChipStyle {
+  label?: string,
+  chipClass?: string,
+  bgColor?: string,
+  textColor?: string,
+  icon?: string,
+}
+
+export interface Chip extends ChipStyle {
+  values?: { [value: string]: ChipStyle },
+}
+
 export interface Column {
   name: string,
   label: string,
   align: 'center' | 'left' | 'right',
   field: string,
   sortable?: boolean,
+  chip?: Chip,
   progress?: {
     barColor?: string,
     barTextColor?: string,

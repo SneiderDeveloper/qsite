@@ -140,13 +140,40 @@ export default defineComponent({
                 column?.bodyClass,
               ]"
             >
-              <span v-if="!column?.progress" class="tw-truncate">
+              <!-- Chip -->
+              <span
+                v-if="column?.chip && !column?.progress"
+                class="
+                  tw-inline-flex
+                  tw-items-center
+                  tw-gap-1.5
+                  tw-max-w-full
+                  tw-px-3
+                  tw-py-1
+                  tw-rounded-full
+                  tw-text-xs
+                  tw-font-semibold
+                  tw-leading-none
+                  tw-whitespace-nowrap
+                "
+                :class="chipStyle(column, row).chipClass"
+                :style="chipStyle(column, row).style"
+              >
+                <i v-if="chipStyle(column, row).icon" :class="chipStyle(column, row).icon" />
+                <span class="tw-truncate">
+                  {{ chipStyle(column, row).label }}
+                </span>
+                <q-tooltip>
+                  {{ chipStyle(column, row).label }}
+                </q-tooltip>
+              </span>
+              <span v-if="!column?.progress && !column?.chip" class="tw-truncate">
                 {{ formatted(row[column.name], column?.format) }}
               </span>
-              <q-tooltip v-if="!column?.progress">
+              <q-tooltip v-if="!column?.progress && !column?.chip">
                 {{ formatted(row[column.name], column?.format) }}
               </q-tooltip>
-              <q-linear-progress 
+              <q-linear-progress
                 v-if="column?.progress"
                 size="22px" 
                 :value="row[column.name]" 
